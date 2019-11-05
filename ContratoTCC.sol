@@ -4,28 +4,20 @@ contract Token {
     bytes32 public name;
     string public symbol;
     bytes32 public decimals;
-    
     uint256 private _totalSupply;
     bool private _allowTransactions;
-    
     mapping (address => uint256) private _balanceOf;
     mapping (address => mapping (address => uint256)) private _allowance;
-    
     event Approval(address indexed _owner, address indexed _spender, uint256 _value);
-
-    
     constructor() public {
         _balanceOf[msg.sender] = _totalSupply;
     }
-    
     function totalSupply() view public returns (uint256 _totalSupply) {
         _totalSupply = _totalSupply;
     }
-    
     function balanceOf(address _address) view public returns (uint balance) {
         return _balanceOf[_address];
     }
-    
     function transfer(address _to, uint256 _value) public returns (bool success) {
         if(_value <= balanceOf(msg.sender)) {
             _balanceOf[msg.sender] = _balanceOf[msg.sender] - _value;
@@ -34,7 +26,6 @@ contract Token {
         }
         return false;
     }
-    
     // Allows another contract to spend tokens on behalf og the '_from' address and sem them to the '_to' address.
     // _from => the address wich approved you to spend tokens on their behalf.
     function transferFrom(address _from, address _to, uint256 tokens) public returns (bool success) {
@@ -45,13 +36,11 @@ contract Token {
         }
         return false;
     }
-    
     function approve(address spender, uint256 tokens) public returns (bool success) {
         _allowance[msg.sender][spender] = tokens;
         emit Approval(msg.sender, spender, tokens);
         return true;
     }
-     
      // Checks the amount of tokens that an ower allowed to a spender.
      // tokenOwner => the address wich owns the funds allowed for spending by a third-party.
      // spender => the third-party address that is allowed to spend the tokens
@@ -114,7 +103,7 @@ contract FirstDeposit {
         withdrawer = _withdrawer;
     }
     
-    function getProviderGaranty(address provider, uint256 price) internal {
+    function getProviderGaranty(address provider, uint256 price) public {
         require(msg.sender == provider);
         garanty = garanty + (price / 5);
         
@@ -123,7 +112,7 @@ contract FirstDeposit {
         emit GarantySent(msg.sender, withdrawer, garanty);
     }
     
-    function getReceiverGaranty(address receiver, uint256 price) internal {
+    function getReceiverGaranty(address receiver, uint256 price) public {
         require(msg.sender == receiver);
         value = value + price;
         
@@ -146,21 +135,17 @@ contract FirstDeposit {
 } 
 
 contract MyContract {
-    
     Token token;
     GenericContract genericContract;
     FirstDeposit firstDeposit;
-    
     uint256 price;
     uint256 serviceDuration;
     address public provider;
     address public receiver;
-
-    
+    int[] tasks;
     event Withdraw(address token, address user, uint256 amount, uint256 balance);
     event ServiceProvided(address provider);
     event ServiceReceived(address receiver);
-    
     constructor(
             address _tokenForRegistration,
             address _provider,
@@ -169,36 +154,34 @@ contract MyContract {
             uint256 _serviceDuration
     ) public {
             require(_tokenForRegistration != address(0x0), "token at address zero");
-    
             token = Token(_tokenForRegistration);
             // Check if the contract is indeed a token contract
             require(token.totalSupply() > 0);
-    
             serviceDuration = _serviceDuration;
             price = _price;
             provider = _provider;
             receiver = _receiver;
         }
         
-        //         getProviderGaranty(_provider, _price);
-        // getReceiverGaranty(_receiver, _price);
+    function startContract(address _provider, address _receiver,  uint256 _price, int[] _tasks) public {    
+        firstDeposit.getProviderGaranty(_provider, _price);
+        firstDeposit.getReceiverGaranty(_receiver, _price);
+        
+        tasks = _tasks;
+    }
     
     function serviceProvided(uint256 _days) public returns (bool success) {
         if (msg.sender == provider && _days <= serviceDuration) {
             emit ServiceProvided(provider);
             return true;
         }
-        return false;
-    }
-    
+        return false;}
     function serviceReceived() public returns (bool success) {
         if(msg.sender == receiver) {
             emit ServiceReceived(receiver);
             return true;
         }
-        return false;
-    }
-    
+        return false; }
     function withdraw(address _to, uint256 amount, uint256 _days) external {
         uint256 balance = token.balanceOf(msg.sender);
         require(serviceProvided(_days) == true);
@@ -209,13 +192,11 @@ contract MyContract {
         selfdestruct(_to);
         emit Withdraw(_to, msg.sender, amount, balance);
     }
-    
     function serviceNotProvided(address _receiver, uint256 _days) external {
         if(serviceProvided(_days) == false) {
             firstDeposit.returnReceiverValue(_receiver);
         }
     }
-    
 }
 
 
