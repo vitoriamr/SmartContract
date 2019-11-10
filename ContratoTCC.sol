@@ -1,5 +1,13 @@
 pragma solidity ^0.4.22;
 
+// REGRAS DO CONTRATO
+
+// As tarefas a serem feitas para que o determinado contrato seja dado como encerrado são as seguintes:
+// 1. Retirar o pó dos livros;
+// 2. Varrer a casa;
+// 3. Lavar a louça;
+// 4. Retirar o lixo
+
 contract Token {
     bytes32 public name;
     string public symbol;
@@ -12,8 +20,8 @@ contract Token {
     constructor() public {
         _balanceOf[msg.sender] = _totalSupply;
     }
-    function totalSupply() view public returns (uint256 _totalSupply) {
-        _totalSupply = _totalSupply;
+    function totalSupply() view public returns (uint256 totalSupply) {
+        totalSupply = _totalSupply;
     }
     function balanceOf(address _address) view public returns (uint balance) {
         return _balanceOf[_address];
@@ -97,6 +105,7 @@ contract FirstDeposit {
     event ValueRestored(address _to, uint256 value);
     
     Token token;
+
     
     constructor(address _owner, address _withdrawer) public {
         token = Token(_owner);
@@ -146,6 +155,8 @@ contract MyContract {
     event Withdraw(address token, address user, uint256 amount, uint256 balance);
     event ServiceProvided(address provider);
     event ServiceReceived(address receiver);
+    
+    event Oi(uint256 teste);
     constructor(
             address _tokenForRegistration,
             address _provider,
@@ -156,32 +167,38 @@ contract MyContract {
             require(_tokenForRegistration != address(0x0), "token at address zero");
             token = Token(_tokenForRegistration);
             // Check if the contract is indeed a token contract
-            require(token.totalSupply() > 0);
+           // require(token.totalSupply() > 0);
             serviceDuration = _serviceDuration;
             price = _price;
             provider = _provider;
             receiver = _receiver;
         }
         
-    function startContract(address _provider, address _receiver,  uint256 _price, int[] _tasks) public {    
-        firstDeposit.getProviderGaranty(_provider, _price);
-        firstDeposit.getReceiverGaranty(_receiver, _price);
+    // function startContract(address _provider, address _receiver,  uint256 _price, int[] _tasks) public {    
+    //     firstDeposit.getProviderGaranty(_provider, _price);
+    //     firstDeposit.getReceiverGaranty(_receiver, _price);
         
-        tasks = _tasks;
-    }
+    //     tasks = _tasks;
+    // }
     
     function serviceProvided(uint256 _days) public returns (bool success) {
         if (msg.sender == provider && _days <= serviceDuration) {
             emit ServiceProvided(provider);
             return true;
         }
-        return false;}
+        return false;
+        
+    }
+        
     function serviceReceived() public returns (bool success) {
         if(msg.sender == receiver) {
             emit ServiceReceived(receiver);
             return true;
         }
-        return false; }
+        return false;
+        
+    }
+    
     function withdraw(address _to, uint256 amount, uint256 _days) external {
         uint256 balance = token.balanceOf(msg.sender);
         require(serviceProvided(_days) == true);
@@ -192,11 +209,18 @@ contract MyContract {
         selfdestruct(_to);
         emit Withdraw(_to, msg.sender, amount, balance);
     }
+    
     function serviceNotProvided(address _receiver, uint256 _days) external {
         if(serviceProvided(_days) == false) {
             firstDeposit.returnReceiverValue(_receiver);
         }
     }
+    
+    function teste(address _address) public returns (uint256) {
+        uint256 balance = token.balanceOf(address(this));
+         emit Oi(balance);
+        
+    } 
 }
 
 
