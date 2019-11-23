@@ -27,12 +27,14 @@ contract MyContract {
     uint256 public price;
     uint8 public limiteDias;
     
+    uint8 private diasInformados;
+    
     bool private garantiaContratantePaga = false;
     bool private garantiaContratadoPaga = false;
     
     address public contratante;
     address public contratado;
-    address contrato = 0xa3F76Fa81032E0D68a202e887a597ee7B230b566;
+    address contrato = 0xB7901D68C4bc97d5c2558C97b9BD4Adf5ce702E6;
     
     enum State { Criado, Contratado, Prestado, Encerrado, Cancelado }
     State public state;
@@ -81,19 +83,19 @@ contract MyContract {
      require(state == State.Contratado, "Contrato não válido");
       if(dias <= limiteDias) {
         state = State.Prestado;
+        diasInformados = dias;
       } else {
         state = State.Cancelado;
-        revert("Contrato Cancelado");
       }
   }
   
   function servicoRecebido(uint8 dias) public apenasContratante {
     require(state == State.Prestado, "Serviço ainda não prestado");
+    require(dias == diasInformados, "Dia informado não bate com o dia informado pelo contratado.");
       if(dias <= limiteDias) {
         state = State.Encerrado;
       } else {
         state = State.Cancelado;
-        revert("Contrato Cancelado");
       }
   }
   
