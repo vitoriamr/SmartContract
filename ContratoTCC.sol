@@ -26,9 +26,7 @@ contract ERC20 is ERC20Basic {
 contract MyContract {
     uint256 public price;
     uint8 public limiteDias;
-    
-    uint8 private diasInformados;
-    
+
     bool private garantiaContratantePaga = false;
     bool private garantiaContratadoPaga = false;
     
@@ -83,7 +81,6 @@ contract MyContract {
      require(state == State.Contratado, "Contrato não válido");
       if(dias <= limiteDias) {
         state = State.Prestado;
-        diasInformados = dias;
       } else {
         state = State.Cancelado;
       }
@@ -91,7 +88,6 @@ contract MyContract {
   
   function servicoRecebido(uint8 dias) public apenasContratante {
     require(state == State.Prestado, "Serviço ainda não prestado");
-    require(dias == diasInformados, "Dia informado não bate com o dia informado pelo contratado.");
       if(dias <= limiteDias) {
         state = State.Encerrado;
       } else {
