@@ -3,10 +3,13 @@ pragma solidity ^0.4.22;
 // REGRAS DO CONTRATO
 
 // As tarefas a serem feitas para que o determinado contrato seja dado como encerrado são as seguintes:
-// 1. Retirar o pó dos livros;
-// 2. Varrer a casa;
-// 3. Lavar a louça;
-// 4. Retirar o lixo
+// 1. Retirar o pó de toda a casa, incluindo enfeites, livros, etc;
+// 2. Varrer ou aspirar a casa;
+// 3. Lavar e secar a louça;
+// 4. Limpeza do banheiro;
+// 5. Lavar e estender as roupas;
+// 6. Limpar todos os vidros e janelas da casa;
+// 7. Retirar o lixo.
 
 
 contract ERC20Basic {
