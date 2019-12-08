@@ -68,6 +68,45 @@ contract MyContract {
         require(state == State.Cancelado);
         payableContratante.transfer(price);
     }
+    
+    function garantiaContratante() public apenasContratante payable {
+        require(msg.value == price,  "Preco errado");
+        balances[msg.sender] += msg.value;
+        
+        garantiaContratantePaga = true;
+        if(garantiaContratadoPaga == true){
+            contratoEstabelecido();
+        }
+    }
+
+    function garantiaContratado() public apenasContratado payable {
+        require(msg.value == price/5,  "Preco errado");
+        balances[msg.sender] += msg.value;
+        
+        garantiaContratadoPaga = true;
+        if(garantiaContratantePaga == true){
+            contratoEstabelecido();
+        }
+    }
+    
+    function contratoEstabelecido() private {
+        require(garantiaContratadoPaga == true && garantiaContratantePaga == true, "Garantias não feitas");
+        state = State.Contratado;
+        deadline = now + (limiteDias * 1 days);
+    }
+    
+    function estornarGarantias() public payable  {
+        require(state == State.Criado, "Estorno inválido");
+        if(garantiaContratadoPaga == true) {
+            payableContratado.transfer(price/5);
+            garantiaContratadoPaga = false;
+        } 
+        if(garantiaContratantePaga == true) {
+            payableContratante.transfer(price);
+            garantiaContratantePaga = false;
+        }
+        state = State.Cancelado;
+    }
 
     function servicoPrestado() public apenasContratado {
         require(state == State.Contratado, "Contrato não válido");
@@ -86,45 +125,6 @@ contract MyContract {
         } else {
             state = State.Cancelado;
         }
-    }
-
-    function garantiaContratante() public apenasContratante payable {
-        require(msg.value == price,  "Preco errado");
-        balances[msg.sender] += msg.value;
-        
-        garantiaContratantePaga = true;
-        if(garantiaContratadoPaga == true){
-            contratoEstabelecido();
-        }
-}
-
-    function garantiaContratado() public apenasContratado payable {
-        require(msg.value == price/5,  "Preco errado");
-        balances[msg.sender] += msg.value;
-        
-        garantiaContratadoPaga = true;
-        if(garantiaContratantePaga == true){
-            contratoEstabelecido();
-        }
-    }
-
-    function contratoEstabelecido() private {
-        require(garantiaContratadoPaga == true && garantiaContratantePaga == true, "Garantias não feitas");
-        state = State.Contratado;
-        deadline = now + (limiteDias * 1 days);
-    }
-
-    function estornarGarantias() public payable  {
-        require(state == State.Criado, "Estorno inválido");
-        if(garantiaContratadoPaga == true) {
-            payableContratado.transfer(price/5);
-            garantiaContratadoPaga = false;
-        } 
-        if(garantiaContratantePaga == true) {
-            payableContratante.transfer(price);
-            garantiaContratantePaga = false;
-        }
-        state = State.Cancelado;
     }
 
     function numContrato() public view returns(address contratoAddr){
@@ -148,7 +148,7 @@ contract MyContract {
         return ("As tarefas a serem feitas para que o determinado contrato seja dado como encerrado são as seguintes: 1. Retirar o pó de toda a casa, incluindo enfeites, livros, etc; 2. Varrer ou aspirar a casa; 3. Lavar e secar a louça; 4. Limpeza do banheiro; 5. Lavar e estender as roupas; 6. Limpar todos os vidros e janelas da casa; 7. Retirar o lixo.");
     }
 
-    function estadoAtualHumanizado() public view returns (string memory estado){
+    function estadoAtualContrato() public view returns (string memory estado){
         if(state == State.Criado){
             return ("Criado");
         } 
